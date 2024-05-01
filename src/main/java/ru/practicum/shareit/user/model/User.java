@@ -19,13 +19,9 @@ import java.util.Set;
 @AllArgsConstructor
 public class User {
     private Long id;
-    @NotNull(message = "Имя не может быть пустым")
     private String name;
-    @NotNull(message = "Email не может быть пустым")
-    @Email(message = "Введён некоректный e-mail")
     private String email;
-    @Builder.Default
-    private Set<Long> items = new HashSet<>();
+    private Set<Long> items;
 
     @Override
     public boolean equals(Object object) {
