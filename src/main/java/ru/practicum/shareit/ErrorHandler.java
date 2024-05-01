@@ -18,7 +18,7 @@ import java.util.Map;
 public class ErrorHandler {
     @ExceptionHandler
     public ResponseEntity<Map<String, String>> handleThrowable(final Throwable throwable) {
-        log.warn("Ошибка! {}", throwable.getMessage());
+        log.error("Ошибка! {}", throwable.getMessage());
         return new ResponseEntity<>(
                 Map.of("error", throwable.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR
         );
@@ -26,7 +26,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     public ResponseEntity<Map<String, String>> handleInvalidId(final IllegalArgumentException e) {
-        log.warn("Ошибка! {}", e.getMessage());
+        log.error("Ошибка! {}", e.getMessage());
         return new ResponseEntity<>(
                 Map.of("error", e.getMessage()), HttpStatus.CONFLICT
         );
@@ -34,7 +34,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     public ResponseEntity<Map<String, String>> handleValidationException(final ValidationException e) {
-        log.warn("Ошибка! {}", e.getMessage());
+        log.error("Ошибка! {}", e.getMessage());
         return new ResponseEntity<>(
                 Map.of("error", e.getMessage()), HttpStatus.NOT_FOUND
         );
@@ -42,7 +42,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     public ResponseEntity<Map<String, String>> handleBadRequestException(final BadRequestException e) {
-        log.warn("Ошибка! {}", e.getMessage());
+        log.error("Ошибка! {}", e.getMessage());
         return new ResponseEntity<>(
                 Map.of("error", e.getMessage()), HttpStatus.BAD_REQUEST
         );
