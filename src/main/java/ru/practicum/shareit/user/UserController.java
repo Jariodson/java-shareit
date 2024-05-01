@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
@@ -28,7 +27,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDto> createUser(@Valid @RequestBody User user) {
+    public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto user) {
         log.info("Получен запрос POST на добовление пользователя");
         UserDto userDto = userService.createUser(user);
         log.info("Пользователь с Id: {} успешно добвлен!", userDto.getId());
@@ -36,7 +35,7 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}")
-    public ResponseEntity<UserDto> updateUser(@RequestBody User user,
+    public ResponseEntity<UserDto> updateUser(@Valid @RequestBody UserDto user,
                                               @PathVariable(value = "userId") long userId) {
         log.info("Получен запрос PATCH на обновление данных пользователя с ID: {}", userId);
         UserDto userDto = userService.updateUser(userId, user);

@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
@@ -29,7 +28,7 @@ public class ItemController {
 
     @PostMapping
     public ResponseEntity<ItemDto> createItem(@RequestHeader("X-Sharer-User-Id") long userId,
-                                              @Valid @RequestBody Item item) {
+                                              @Valid @RequestBody ItemDto item) {
         log.info("Получен запрос POST на добавление предмета пользователем с ID: {}", userId);
         ItemDto itemDto = itemService.createItem(userId, item);
         log.info("Предмет с ID: {} успешно добавлен пользователем с ID: {}", itemDto.getId(), userId);
@@ -38,7 +37,7 @@ public class ItemController {
 
     @PatchMapping("/{itemId}")
     public ResponseEntity<ItemDto> updateItem(@RequestHeader("X-Sharer-User-Id") long userId,
-                                              @RequestBody Item item,
+                                              @RequestBody ItemDto item,
                                               @PathVariable(value = "itemId") long itemId) {
         log.info("Получен запрос PATCH на обновление данных предмета пользователем с ID: {}", userId);
         ItemDto itemDto = itemService.updateItem(userId, itemId, item);
