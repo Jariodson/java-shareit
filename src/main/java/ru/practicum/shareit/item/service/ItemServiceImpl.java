@@ -29,24 +29,25 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto createItem(long userId, Item item) {
+    public ItemDto createItem(long userId, ItemDto itemDto) {
         try {
             userService.validateUserId(userId);
         } catch (IllegalArgumentException ex) {
             throw new ValidationException("Пользователь с ID" + userId + " не найден!");
         }
+        Item item = mapper.transformItemDtoToItem(itemDto);
         itemStorage.createItem(item, userId);
-        User user = userService.getUserById(userId);
         return mapper.transformItemToItemDto(item);
     }
 
     @Override
-    public ItemDto updateItem(long userId, long itemId, Item item) {
+    public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) {
         userService.validateUserId(userId);
         checkItem(itemId);
         if (!userService.getUserById(userId).getItems().contains(itemId)) {
             throw new ValidationException("Пользователь с ID: " + userId + " не владеет вещью с ID: " + itemId);
         }
+        Item item = mapper.transformItemDtoToItem(itemDto);
         item.setId(itemId);
         itemStorage.updateItem(item);
         Item updatedItem = itemStorage.getItemById(itemId);

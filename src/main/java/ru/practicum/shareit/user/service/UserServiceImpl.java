@@ -4,11 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserStorage;
 
+import javax.validation.ValidationException;
 import java.util.Collection;
 
 @Slf4j
@@ -29,7 +31,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto createUser(User user) {
+    public UserDto createUser(UserDto userDto) {
+        if (userDto.getName() == null) {
+            throw new ValidationException("Имя не может быть пустым");
+        }
+        if (userDto.getEmail() == null) {
+            throw new BadRequestException("Email не может быть пустым");
+        }
+        User user = mapper.transformUserDtoToUser(userDto);
         if (userStorage.getAllUsers().contains(user)) {
             throw new IllegalArgumentException("Пользователь уже существует в базе данных!");
         }
@@ -38,8 +47,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto updateUser(long userId, User user) {
+    public UserDto updateUser(long userId, UserDto userDto) {
         validateUserId(userId);
+        User user = mapper.transformUserDtoToUser(userDto);
         for (User dbUser : userStorage.getAllUsers()) {
             if (dbUser.equals(user) && dbUser.getId() != userId) {
                 throw new IllegalArgumentException("Пользователь с таким email уже существует!");
