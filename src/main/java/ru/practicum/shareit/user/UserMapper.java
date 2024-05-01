@@ -18,6 +18,15 @@ public class UserMapper {
                 .build();
     }
 
+    public User transformUserDtoToUser(UserDto userDto) {
+        return User.builder()
+                .id(userDto.getId())
+                .name(userDto.getName())
+                .email(userDto.getEmail())
+                .items(userDto.getItems())
+                .build();
+    }
+
     public Collection<UserDto> transformUserListToUserDtoList(Collection<User> users) {
         return users.stream().map(this::transformUserToUserDto).collect(Collectors.toList());
     }

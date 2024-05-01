@@ -18,6 +18,15 @@ public class ItemMapper {
                 .build();
     }
 
+    public Item transformItemDtoToItem(ItemDto itemDto) {
+        return Item.builder()
+                .id(itemDto.getId())
+                .name(itemDto.getName())
+                .description(itemDto.getDescription())
+                .available(itemDto.getAvailable())
+                .build();
+    }
+
     public Collection<ItemDto> transformListItemToListItemDto(Collection<Item> items) {
         return items.stream().map(this::transformItemToItemDto).collect(Collectors.toList());
     }
