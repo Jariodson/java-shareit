@@ -1,25 +1,24 @@
 package ru.practicum.shareit.user.service;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.BadRequestException;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.UserMapper;
+import ru.practicum.shareit.user.dto.UserCreateDto;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserUpdatedDto;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserStorage;
 
-import javax.validation.ValidationException;
 import java.util.Collection;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-@Slf4j
 @Service
 public class UserServiceImpl implements UserService {
     private final UserStorage userStorage;
     private final UserMapper mapper;
 
-    @Autowired
     public UserServiceImpl(UserStorage userStorage, UserMapper mapper) {
         this.userStorage = userStorage;
         this.mapper = mapper;
@@ -27,65 +26,53 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Collection<UserDto> getUsers() {
-        return mapper.transformUserListToUserDtoList(userStorage.getAllUsers());
+        return userStorage.findAll().stream()
+                .map(mapper::transformUserToUserDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public UserDto createUser(UserDto userDto) {
-        if (userDto.getName() == null) {
-            throw new ValidationException("Имя не может быть пустым");
-        }
-        if (userDto.getEmail() == null) {
-            throw new BadRequestException("Email не может быть пустым");
-        }
-        User user = mapper.transformUserDtoToUser(userDto);
-        if (userStorage.getAllUsers().contains(user)) {
-            throw new IllegalArgumentException("Пользователь уже существует в базе данных!");
-        }
-        userStorage.addNewUser(user);
-        return mapper.transformUserToUserDto(user);
+    @Transactional
+    public UserDto createUser(UserCreateDto user) {
+        User newUser = mapper.transformUserCreatedDtoToUser(user);
+        return mapper.transformUserToUserDto(userStorage.save(newUser));
     }
 
     @Override
-    public UserDto updateUser(long userId, UserDto userDto) {
-        validateUserId(userId);
-        User user = mapper.transformUserDtoToUser(userDto);
-        for (User dbUser : userStorage.getAllUsers()) {
-            if (dbUser.equals(user) && dbUser.getId() != userId) {
-                throw new IllegalArgumentException("Пользователь с таким email уже существует!");
-            }
+    @Transactional
+    public UserDto updateUser(long userId, UserUpdatedDto userDto) {
+        User userFromDb = validateUserDto(userId);
+        User user = mapper.trasformUserUpdatedDtoToUser(userDto, userId);
+        if (user.getEmail() != null) {
+            userFromDb.setEmail(user.getEmail());
         }
-        userStorage.updateUser(userId, user);
-        User updatedUser = userStorage.getUserById(userId);
-        return mapper.transformUserToUserDto(updatedUser);
+        if (user.getName() != null) {
+            userFromDb.setName(user.getName());
+        }
+        userStorage.save(userFromDb);
+        return mapper.transformUserToUserDto(userFromDb);
     }
 
     @Override
+    @Transactional
     public UserDto removeUser(Long id) {
-        validateUserId(id);
-        User user = userStorage.getUserById(id);
-        userStorage.deleteUser(id);
-        return mapper.transformUserToUserDto(user);
+        UserDto userDto = getUserById(id);
+        userStorage.deleteById(id);
+        return userDto;
     }
 
     @Override
-    public UserDto getUserDtoById(long id) {
-        validateUserId(id);
-        return mapper.transformUserToUserDto(userStorage.getUserById(id));
-    }
-
-    @Override
-    public void validateUserId(Long id) {
-        try {
-            userStorage.getUserById(id);
-        } catch (EmptyResultDataAccessException e) {
-            throw new IllegalArgumentException("Пользователь с ID: " + id + " не найден!");
+    public UserDto getUserById(long id) {
+        Optional<User> user = userStorage.findById(id);
+        if (user.isPresent()) {
+            return mapper.transformUserToUserDto(user.get());
         }
+        throw new NotFoundException(String.format("Пользователь с ID %d не найден", id));
     }
 
     @Override
-    public User getUserById(long userId) {
-        validateUserId(userId);
-        return userStorage.getUserById(userId);
+    public User validateUserDto(long userId) {
+        return userStorage.findById(userId).orElseThrow(() ->
+                new NotFoundException(String.format("Пользователь с ID %d не найден", userId)));
     }
 }

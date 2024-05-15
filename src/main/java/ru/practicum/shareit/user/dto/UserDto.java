@@ -1,24 +1,21 @@
 package ru.practicum.shareit.user.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
  * TODO Sprint add-controllers.
  */
-@Data
 @Builder
-@AllArgsConstructor
+@Getter
+@Setter
 public class UserDto {
     private Long id;
     private String name;
-    @Email(message = "Введён некоректный e-mail")
     private String email;
-    @Builder.Default
-    private Set<Long> items = new HashSet<>();
 }
