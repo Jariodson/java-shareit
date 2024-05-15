@@ -98,7 +98,6 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    @Transactional
     public Collection<ItemDto> searchItemByName(String text, long userId) {
         userService.validateUserDto(userId);
         if (text.isBlank()) {
@@ -115,6 +114,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public CommentDto addComment(CommentCreatedDto commentCreatedDto, long itemId, long userId) {
         Comment comment = commentMapper.transformCommentCreatedDtoToComment(commentCreatedDto);
         Item item = validateItemById(itemId);
