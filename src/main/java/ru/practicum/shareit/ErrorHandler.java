@@ -1,7 +1,6 @@
 package ru.practicum.shareit;
 
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.InternalServerErrorException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.dto.ItemCreatedDto;
 
 import javax.validation.ValidationException;
 import java.util.HashMap;

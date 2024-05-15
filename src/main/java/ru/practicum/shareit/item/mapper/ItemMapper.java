@@ -20,7 +20,7 @@ public class ItemMapper {
                 .build();
     }
 
-    public Item transformItemCreatedDtoToItem(ItemCreatedDto itemUpdatedDto){
+    public Item transformItemCreatedDtoToItem(ItemCreatedDto itemUpdatedDto) {
         return Item.builder()
                 .name(itemUpdatedDto.getName())
                 .description(itemUpdatedDto.getDescription())
@@ -28,7 +28,7 @@ public class ItemMapper {
                 .build();
     }
 
-    public Item transformItemUpdatedDtoToItem(ItemUpdatedDto itemUpdatedDto){
+    public Item transformItemUpdatedDtoToItem(ItemUpdatedDto itemUpdatedDto) {
         return Item.builder()
                 .id(itemUpdatedDto.getId())
                 .name(itemUpdatedDto.getName())

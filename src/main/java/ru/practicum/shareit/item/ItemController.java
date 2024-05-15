@@ -6,9 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.*;
-import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.item.storage.CommentStorage;
 
 import javax.validation.Valid;
 import java.util.Collection;
@@ -89,7 +87,7 @@ public class ItemController {
     @PostMapping("/{itemId}/comment")
     public ResponseEntity<CommentDto> addComment(@RequestHeader("X-Sharer-User-Id") long userId,
                                                  @PathVariable(value = "itemId") long itemId,
-                                                 @Valid @RequestBody CommentCreatedDto commentCreatedDto){
+                                                 @Valid @RequestBody CommentCreatedDto commentCreatedDto) {
         log.info("Получен запрос POST на добовление комментария вещи с ID: {} пользователем с ID: {}", itemId, userId);
         CommentDto commentDto = itemService.addComment(commentCreatedDto, itemId, userId);
         log.info("Комментарий с ID: {} успешно добавлен!", commentDto.getId());

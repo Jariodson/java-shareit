@@ -40,7 +40,7 @@ public class BookingMapper {
                 .build();
     }
 
-    public BookingItemDto transformBookingToBookingItemDto(Booking booking){
+    public BookingItemDto transformBookingToBookingItemDto(Booking booking) {
         return BookingItemDto.builder()
                 .id(booking.getId())
                 .bookerId(booking.getBooker().getId())

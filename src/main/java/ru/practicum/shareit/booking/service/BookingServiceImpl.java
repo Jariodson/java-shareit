@@ -45,7 +45,7 @@ public class BookingServiceImpl implements BookingService {
         }
         booking.setItem(item);
         User user = userService.validateUserDto(userId);
-        if (user.equals(item.getUser())){
+        if (user.equals(item.getUser())) {
             throw new NotFoundException("Владелец вещи не может ее забронировать!");
         }
         booking.setBooker(user);
@@ -60,12 +60,12 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException("Подтверждение брони может быть выполнено только владельцем!");
         }
         if (status) {
-            if (Status.valueOf(booking.getStatus()).equals(Status.APPROVED)){
+            if (Status.valueOf(booking.getStatus()).equals(Status.APPROVED)) {
                 throw new BadRequestException("Нельзя подтверить бронь после подтверждения!");
             }
             booking.setStatus(Status.APPROVED.toString());
         } else {
-            if (Status.valueOf(booking.getStatus()).equals(Status.REJECTED)){
+            if (Status.valueOf(booking.getStatus()).equals(Status.REJECTED)) {
                 throw new BadRequestException("Нельзя отклонить бронь после отклонения!");
             }
             booking.setStatus(Status.REJECTED.toString());
@@ -77,7 +77,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDto getBookingById(long bookingId, long userId) {
         Booking booking = validateBooking(bookingId);
-        if (booking.getItem().getUser().getId().equals(userId) || booking.getBooker().getId().equals(userId)){
+        if (booking.getItem().getUser().getId().equals(userId) || booking.getBooker().getId().equals(userId)) {
             return mapper.transformBookingToBookingDto(booking);
         }
         throw new NotFoundException("Только владелец брони или вещи может получить данные!");

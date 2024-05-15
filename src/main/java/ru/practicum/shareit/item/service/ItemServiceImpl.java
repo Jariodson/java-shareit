@@ -18,9 +18,7 @@ import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class ItemServiceImpl implements ItemService {
@@ -122,17 +120,17 @@ public class ItemServiceImpl implements ItemService {
         Item item = validateItemById(itemId);
         User user = userService.validateUserDto(userId);
         List<Booking> bookings = bookingStorage.findByItemIdAndBookerId(itemId, userId);
-        if (bookings.isEmpty()){
+        if (bookings.isEmpty()) {
             throw new BadRequestException("Только арендаторы могут оставлять отзыв!");
         }
-        for (Booking booking : bookings){
-            if (Status.REJECTED.equals(Status.valueOf(booking.getStatus()))){
+        for (Booking booking : bookings) {
+            if (Status.REJECTED.equals(Status.valueOf(booking.getStatus()))) {
                 throw new BadRequestException("Нельзя оставить отзыв, есть аренда невозможна!");
             }
         }
         Optional<Booking> booking = bookings.stream().min(Comparator.comparing(Booking::getStart));
-        if (booking.isPresent()){
-            if (booking.get().getStart().isAfter(comment.getCreated())){
+        if (booking.isPresent()) {
+            if (booking.get().getStart().isAfter(comment.getCreated())) {
                 throw new BadRequestException("Нельзя оставлять отзыв до аренды!");
             }
         }
@@ -151,10 +149,10 @@ public class ItemServiceImpl implements ItemService {
                 Booking nextBooking = nextBookings.get(nextBookings.size() - 1);
                 itemDto.setLastBooking(bookingMapper.transformBookingToBookingItemDto(lastBooking));
                 itemDto.setNextBooking(bookingMapper.transformBookingToBookingItemDto(nextBooking));
-            }else {
+            } else {
                 List<Booking> activeBookings = bookingStorage.findActiveBookings(userId);
-                for (Booking booking : activeBookings){
-                    if (booking.getItem().getId().equals(item.getId())){
+                for (Booking booking : activeBookings) {
+                    if (booking.getItem().getId().equals(item.getId())) {
                         itemDto.setLastBooking(bookingMapper.transformBookingToBookingItemDto(booking));
                     }
                 }

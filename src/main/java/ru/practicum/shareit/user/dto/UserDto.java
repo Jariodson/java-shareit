@@ -1,12 +1,8 @@
 package ru.practicum.shareit.user.dto;
 
-import lombok.*;
-
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * TODO Sprint add-controllers.

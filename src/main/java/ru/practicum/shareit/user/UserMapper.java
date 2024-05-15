@@ -6,9 +6,6 @@ import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserUpdatedDto;
 import ru.practicum.shareit.user.model.User;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
-
 @Component
 public class UserMapper {
     public UserDto transformUserToUserDto(User user) {

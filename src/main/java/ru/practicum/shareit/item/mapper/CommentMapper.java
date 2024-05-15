@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class CommentMapper {
-    public CommentDto transformCommentToCommentDto(Comment comment){
+    public CommentDto transformCommentToCommentDto(Comment comment) {
         return CommentDto.builder()
                 .id(comment.getId())
                 .text(comment.getText())
@@ -20,14 +20,14 @@ public class CommentMapper {
                 .build();
     }
 
-    public Comment transformCommentCreatedDtoToComment(CommentCreatedDto commentCreatedDto){
+    public Comment transformCommentCreatedDtoToComment(CommentCreatedDto commentCreatedDto) {
         return Comment.builder()
                 .text(commentCreatedDto.getText())
                 .created(LocalDateTime.now())
                 .build();
     }
 
-    public List<CommentDto> transformCommentsListToCommentsDtoList(List<Comment> comments){
+    public List<CommentDto> transformCommentsListToCommentsDtoList(List<Comment> comments) {
         return comments.stream().map(this::transformCommentToCommentDto).collect(Collectors.toList());
     }
 }
