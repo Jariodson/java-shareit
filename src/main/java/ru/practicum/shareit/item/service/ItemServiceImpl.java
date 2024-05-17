@@ -124,15 +124,13 @@ public class ItemServiceImpl implements ItemService {
             throw new BadRequestException("Только арендаторы могут оставлять отзыв!");
         }
         for (Booking booking : bookings) {
-            if (Status.REJECTED.equals(Status.valueOf(booking.getStatus()))) {
+            if (Status.REJECTED == booking.getStatus()) {
                 throw new BadRequestException("Нельзя оставить отзыв, есть аренда невозможна!");
             }
         }
         Optional<Booking> booking = bookings.stream().min(Comparator.comparing(Booking::getStart));
-        if (booking.isPresent()) {
-            if (booking.get().getStart().isAfter(comment.getCreated())) {
-                throw new BadRequestException("Нельзя оставлять отзыв до аренды!");
-            }
+        if (booking.get().getStart().isAfter(comment.getCreated())) {
+            throw new BadRequestException("Нельзя оставлять отзыв до аренды!");
         }
         comment.setItem(item);
         comment.setAuthor(user);

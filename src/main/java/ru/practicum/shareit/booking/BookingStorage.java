@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import ru.practicum.shareit.booking.enums.Status;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -48,7 +49,7 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
             "WHERE b.booker.id = :bookerId " +
             "AND b.status = :status " +
             "ORDER BY b.start DESC")
-    List<Booking> findAllByStatusAndBookerId(@Param("bookerId") long bookerId, @Param("status") String status);
+    List<Booking> findAllByStatusAndBookerId(@Param("bookerId") long bookerId, @Param("status") Status status);
 
 
     @Query("SELECT b FROM Booking b " +
@@ -79,7 +80,7 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
             "WHERE b.item.user.id = :userId " +
             "AND b.status = :status " +
             "ORDER BY b.start DESC")
-    List<Booking> findAllByStatusAndOwnerId(@Param("userId") long userId, @Param("status") String status);
+    List<Booking> findAllByStatusAndOwnerId(@Param("userId") long userId, @Param("status") Status status);
 
 
     @Query("SELECT b FROM Booking b " +

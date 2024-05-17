@@ -28,13 +28,13 @@ public class BookingMapper {
                 .end(booking.getEnd())
                 .booker(userMapper.transformUserToUserDto(booking.getBooker()))
                 .item(itemMapper.transformItemToItemDto(booking.getItem()))
-                .status(Status.valueOf(booking.getStatus()))
+                .status(booking.getStatus())
                 .build();
     }
 
     public Booking transformBookingCreatedDtoToBooking(BookingCreatedDto bookingCreatedDto) {
         return Booking.builder()
-                .status(Status.WAITING.toString())
+                .status(Status.WAITING)
                 .start(bookingCreatedDto.getStart())
                 .end(bookingCreatedDto.getEnd())
                 .build();

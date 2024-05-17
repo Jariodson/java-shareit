@@ -22,6 +22,6 @@ public class Item {
     private String description;
     private Boolean available;
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 }

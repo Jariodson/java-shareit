@@ -60,15 +60,15 @@ public class BookingServiceImpl implements BookingService {
             throw new NotFoundException("Подтверждение брони может быть выполнено только владельцем!");
         }
         if (status) {
-            if (Status.valueOf(booking.getStatus()).equals(Status.APPROVED)) {
+            if (booking.getStatus() == Status.APPROVED) {
                 throw new BadRequestException("Нельзя подтверить бронь после подтверждения!");
             }
-            booking.setStatus(Status.APPROVED.toString());
+            booking.setStatus(Status.APPROVED);
         } else {
-            if (Status.valueOf(booking.getStatus()).equals(Status.REJECTED)) {
+            if (booking.getStatus() == Status.REJECTED) {
                 throw new BadRequestException("Нельзя отклонить бронь после отклонения!");
             }
-            booking.setStatus(Status.REJECTED.toString());
+            booking.setStatus(Status.REJECTED);
         }
         storage.save(booking);
         return mapper.transformBookingToBookingDto(booking);
@@ -101,10 +101,10 @@ public class BookingServiceImpl implements BookingService {
                         storage.findActiveBookings(userId));
             case "WAITING":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByStatusAndBookerId(userId, Status.WAITING.toString()));
+                        storage.findAllByStatusAndBookerId(userId, Status.WAITING));
             case "REJECTED":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByStatusAndBookerId(userId, Status.REJECTED.toString()));
+                        storage.findAllByStatusAndBookerId(userId, Status.REJECTED));
             default:
                 throw new InternalServerErrorException("Unknown state: " + state);
         }
@@ -128,10 +128,10 @@ public class BookingServiceImpl implements BookingService {
                         storage.findActiveBookingsByOwnerId(userId));
             case "WAITING":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByStatusAndOwnerId(userId, Status.WAITING.toString()));
+                        storage.findAllByStatusAndOwnerId(userId, Status.WAITING));
             case "REJECTED":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByStatusAndOwnerId(userId, Status.REJECTED.toString()));
+                        storage.findAllByStatusAndOwnerId(userId, Status.REJECTED));
             default:
                 throw new InternalServerErrorException("Unknown state: " + state);
         }
