@@ -90,10 +90,10 @@ public class BookingServiceImpl implements BookingService {
                         storage.findAllByBookerIdOrderByStartDesc(userId));
             case "PAST":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByEndBeforeAndBookerIdOrderByStartDesc(LocalDateTime.now() ,userId));
+                        storage.findAllByEndBeforeAndBookerIdOrderByStartDesc(LocalDateTime.now(), userId));
             case "FUTURE":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByStartAfterAndBookerIdOrderByStartDesc(LocalDateTime.now() ,userId));
+                        storage.findAllByStartAfterAndBookerIdOrderByStartDesc(LocalDateTime.now(), userId));
             case "CURRENT":
                 return mapper.transformBookingListToBookingDtoList(
                         storage.findAllByEndAfterAndStartBeforeAndBookerIdOrderByStartDesc(
@@ -118,7 +118,7 @@ public class BookingServiceImpl implements BookingService {
                         storage.findAllByItemUserIdOrderByStartDesc(userId));
             case "PAST":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findByEndBeforeAndItemUserIdOrderByStartDesc(LocalDateTime.now(),userId));
+                        storage.findByEndBeforeAndItemUserIdOrderByStartDesc(LocalDateTime.now(), userId));
             case "FUTURE":
                 return mapper.transformBookingListToBookingDtoList(
                         storage.findAllByItemUserIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
@@ -143,7 +143,7 @@ public class BookingServiceImpl implements BookingService {
                 new NotFoundException(String.format("Бронь с ID %d не найдена", bookingId)));
     }
 
-    private BookingDto checkBookingOwnerOrItemOwner(Booking booking, long userId){
+    private BookingDto checkBookingOwnerOrItemOwner(Booking booking, long userId) {
         if (booking.getItem().getUser().getId().equals(userId) || booking.getBooker().getId().equals(userId)) {
             return mapper.transformBookingToBookingDto(booking);
         }

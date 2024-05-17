@@ -152,7 +152,7 @@ public class ItemServiceImpl implements ItemService {
             } else {
                 List<Booking> activeBookings =
                         bookingStorage.findAllByEndAfterAndStartBeforeAndItemUserIdOrderByStartDesc(
-                        LocalDateTime.now(), LocalDateTime.now(), userId);
+                                LocalDateTime.now(), LocalDateTime.now(), userId);
                 for (Booking booking : activeBookings) {
                     if (booking.getItem().getId().equals(item.getId())) {
                         itemDto.setLastBooking(bookingMapper.transformBookingToBookingItemDto(booking));
