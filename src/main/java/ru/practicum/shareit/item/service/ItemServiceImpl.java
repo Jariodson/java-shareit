@@ -18,6 +18,7 @@ import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -138,8 +139,9 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private ItemDto getLastAndNextBookings(Item item, long userId) {
-        List<Booking> lastBookings = bookingStorage.findByEndTimeOrderByEndTimeDesc(item.getId());
-        List<Booking> nextBookings = bookingStorage.findByStartTimeOrderByStartTimeDesc(item.getId());
+        List<Booking> lastBookings = bookingStorage.findAllByItemIdAndEndBeforeOrderByEndDesc(
+                item.getId(), LocalDateTime.now());
+        List<Booking> nextBookings = bookingStorage.findAllByItemIdAndStartAfter(item.getId(), LocalDateTime.now());
         ItemDto itemDto = mapper.transformItemToItemDto(item);
         if (item.getUser().getId().equals(userId)) {
             if (!lastBookings.isEmpty() && !nextBookings.isEmpty()) {
@@ -148,7 +150,9 @@ public class ItemServiceImpl implements ItemService {
                 itemDto.setLastBooking(bookingMapper.transformBookingToBookingItemDto(lastBooking));
                 itemDto.setNextBooking(bookingMapper.transformBookingToBookingItemDto(nextBooking));
             } else {
-                List<Booking> activeBookings = bookingStorage.findActiveBookings(userId);
+                List<Booking> activeBookings =
+                        bookingStorage.findAllByEndAfterAndStartBeforeAndItemUserIdOrderByStartDesc(
+                        LocalDateTime.now(), LocalDateTime.now(), userId);
                 for (Booking booking : activeBookings) {
                     if (booking.getItem().getId().equals(item.getId())) {
                         itemDto.setLastBooking(bookingMapper.transformBookingToBookingItemDto(booking));

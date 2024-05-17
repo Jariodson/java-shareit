@@ -16,6 +16,7 @@ import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 
 @Service
@@ -85,26 +86,27 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Collection<BookingDto> getUserBookings(String state, long userId) {
-        validateBooking(userId);
+        userService.validateUserDto(userId);
         switch (state) {
             case "ALL":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByBookerId(userId));
+                        storage.findAllByBookerIdOrderByStartDesc(userId));
             case "PAST":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByEndTimeBeforeNow(userId));
+                        storage.findAllByEndBeforeAndBookerIdOrderByStartDesc(LocalDateTime.now() ,userId));
             case "FUTURE":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByStartTimeAfterNow(userId));
+                        storage.findAllByStartAfterAndBookerIdOrderByStartDesc(LocalDateTime.now() ,userId));
             case "CURRENT":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findActiveBookings(userId));
+                        storage.findAllByEndAfterAndStartBeforeAndBookerIdOrderByStartDesc(
+                                LocalDateTime.now(), LocalDateTime.now(), userId));
             case "WAITING":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByStatusAndBookerId(userId, Status.WAITING));
+                        storage.findAllByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING));
             case "REJECTED":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByStatusAndBookerId(userId, Status.REJECTED));
+                        storage.findAllByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED));
             default:
                 throw new InternalServerErrorException("Unknown state: " + state);
         }
@@ -116,22 +118,23 @@ public class BookingServiceImpl implements BookingService {
         switch (state) {
             case "ALL":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByUserOwnerId(userId));
+                        storage.findAllByItemUserIdOrderByStartDesc(userId));
             case "PAST":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByEndTimeBeforeNowUserOwnerId(userId));
+                        storage.findByEndBeforeAndItemUserIdOrderByStartDesc(LocalDateTime.now(),userId));
             case "FUTURE":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByStartTimeAfterNowByOwnerId(userId));
+                        storage.findAllByItemUserIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
             case "CURRENT":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findActiveBookingsByOwnerId(userId));
+                        storage.findAllByEndAfterAndStartBeforeAndItemUserIdOrderByStartDesc(
+                                LocalDateTime.now(), LocalDateTime.now(), userId));
             case "WAITING":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByStatusAndOwnerId(userId, Status.WAITING));
+                        storage.findAllByItemUserIdAndStatusOrderByStartDesc(userId, Status.WAITING));
             case "REJECTED":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByStatusAndOwnerId(userId, Status.REJECTED));
+                        storage.findAllByItemUserIdAndStatusOrderByStartDesc(userId, Status.REJECTED));
             default:
                 throw new InternalServerErrorException("Unknown state: " + state);
         }
