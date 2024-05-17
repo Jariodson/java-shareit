@@ -78,10 +78,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDto getBookingById(long bookingId, long userId) {
         Booking booking = validateBooking(bookingId);
-        if (booking.getItem().getUser().getId().equals(userId) || booking.getBooker().getId().equals(userId)) {
-            return mapper.transformBookingToBookingDto(booking);
-        }
-        throw new NotFoundException("Только владелец брони или вещи может получить данные!");
+        return checkBookingOwnerOrItemOwner(booking, userId);
     }
 
     @Override
@@ -144,5 +141,12 @@ public class BookingServiceImpl implements BookingService {
     public Booking validateBooking(long bookingId) {
         return storage.findById(bookingId).orElseThrow(() ->
                 new NotFoundException(String.format("Бронь с ID %d не найдена", bookingId)));
+    }
+
+    private BookingDto checkBookingOwnerOrItemOwner(Booking booking, long userId){
+        if (booking.getItem().getUser().getId().equals(userId) || booking.getBooker().getId().equals(userId)) {
+            return mapper.transformBookingToBookingDto(booking);
+        }
+        throw new NotFoundException("Только владелец брони или вещи может получить данные!");
     }
 }
