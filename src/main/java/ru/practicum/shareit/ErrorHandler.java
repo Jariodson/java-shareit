@@ -8,6 +8,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.shareit.exception.BadRequestException;
+import ru.practicum.shareit.exception.InternalServerErrorException;
+import ru.practicum.shareit.exception.NotFoundException;
 
 import javax.validation.ValidationException;
 import java.util.HashMap;
@@ -57,5 +59,21 @@ public class ErrorHandler {
             errors.put(fieldName, errorMessage);
         });
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Map<String, String>> handleNotFoundException(final NotFoundException e) {
+        log.error("Ошибка! {}", e.getMessage());
+        return new ResponseEntity<>(
+                Map.of("error", e.getMessage()), HttpStatus.NOT_FOUND
+        );
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<Map<String, String>> handleInternalServerErrorException(final InternalServerErrorException e) {
+        log.error("Ошибка! {}", e.getMessage());
+        return new ResponseEntity<>(
+                Map.of("error", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR
+        );
     }
 }

@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
@@ -28,7 +28,7 @@ public class ItemController {
 
     @PostMapping
     public ResponseEntity<ItemDto> createItem(@RequestHeader("X-Sharer-User-Id") long userId,
-                                              @Valid @RequestBody ItemDto item) {
+                                              @Valid @RequestBody ItemCreatedDto item) {
         log.info("Получен запрос POST на добавление предмета пользователем с ID: {}", userId);
         ItemDto itemDto = itemService.createItem(userId, item);
         log.info("Предмет с ID: {} успешно добавлен пользователем с ID: {}", itemDto.getId(), userId);
@@ -37,7 +37,7 @@ public class ItemController {
 
     @PatchMapping("/{itemId}")
     public ResponseEntity<ItemDto> updateItem(@RequestHeader("X-Sharer-User-Id") long userId,
-                                              @RequestBody ItemDto item,
+                                              @RequestBody ItemUpdatedDto item,
                                               @PathVariable(value = "itemId") long itemId) {
         log.info("Получен запрос PATCH на обновление данных предмета пользователем с ID: {}", userId);
         ItemDto itemDto = itemService.updateItem(userId, itemId, item);
@@ -49,7 +49,7 @@ public class ItemController {
     public ResponseEntity<ItemDto> getItemById(@RequestHeader("X-Sharer-User-Id") long userId,
                                                @PathVariable(value = "itemId") long itemId) {
         log.info("Получен запрос GET на вывод предмета с ID: {} пользователя с ID: {}", itemId, userId);
-        ItemDto itemDto = itemService.getItemById(itemId);
+        ItemDto itemDto = itemService.getItemById(itemId, userId);
         log.info("Вывод предмета с ID: {} пользователя с ID: {}", itemDto.getId(), userId);
         return new ResponseEntity<>(itemDto, HttpStatus.OK);
     }
@@ -74,12 +74,23 @@ public class ItemController {
 
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
-    public Collection<ItemDto> searchItemByText(@RequestParam Optional<String> text) {
-        if (text.isPresent()) {
+    public Collection<ItemDto> searchItemByText(@RequestParam Optional<String> text,
+                                                @RequestHeader("X-Sharer-User-Id") Optional<Long> userId) {
+        if (text.isPresent() && userId.isPresent()) {
             log.info("Получен запрос GET на получение предметов по результатам поиска: {}", text);
             log.info("Вывод предметов вывод предметов связанных с {}", text);
-            return itemService.searchItemByName(text.get());
+            return itemService.searchItemByName(text.get(), userId.get());
         }
         throw new IllegalArgumentException("Ошибка!");
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public ResponseEntity<CommentDto> addComment(@RequestHeader("X-Sharer-User-Id") long userId,
+                                                 @PathVariable(value = "itemId") long itemId,
+                                                 @Valid @RequestBody CommentCreatedDto commentCreatedDto) {
+        log.info("Получен запрос POST на добовление комментария вещи с ID: {} пользователем с ID: {}", itemId, userId);
+        CommentDto commentDto = itemService.addComment(commentCreatedDto, itemId, userId);
+        log.info("Комментарий с ID: {} успешно добавлен!", commentDto.getId());
+        return new ResponseEntity<>(commentDto, HttpStatus.OK);
     }
 }

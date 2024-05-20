@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.user.dto.UserCreateDto;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserUpdatedDto;
 import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
@@ -27,7 +29,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto user) {
+    public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserCreateDto user) {
         log.info("Получен запрос POST на добовление пользователя");
         UserDto userDto = userService.createUser(user);
         log.info("Пользователь с Id: {} успешно добвлен!", userDto.getId());
@@ -35,10 +37,10 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}")
-    public ResponseEntity<UserDto> updateUser(@Valid @RequestBody UserDto user,
+    public ResponseEntity<UserDto> updateUser(@Valid @RequestBody UserUpdatedDto userUpdatedDto,
                                               @PathVariable(value = "userId") long userId) {
         log.info("Получен запрос PATCH на обновление данных пользователя с ID: {}", userId);
-        UserDto userDto = userService.updateUser(userId, user);
+        UserDto userDto = userService.updateUser(userId, userUpdatedDto);
         log.info("Данные пользователя с ID: {} успешно обновлены!", userDto.getId());
         return new ResponseEntity<>(userDto, HttpStatus.OK);
     }
@@ -53,9 +55,9 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public ResponseEntity<UserDto> getUserById(@PathVariable(value = "userId") long userId) {
-        log.info("Получен запрос GET на получение всех предметов пользователя с ID: {}", userId);
-        UserDto userDto = userService.getUserDtoById(userId);
-        log.info("Вывод предметов пользователя с ID: {}", userDto.getId());
+        log.info("Получен запрос GET на вывод пользователя с ID: {}", userId);
+        UserDto userDto = userService.getUserById(userId);
+        log.info("Вывод пользователя с ID: {}", userDto.getId());
         return new ResponseEntity<>(userDto, HttpStatus.OK);
     }
 
