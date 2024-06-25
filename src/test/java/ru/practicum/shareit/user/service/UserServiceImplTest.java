@@ -61,7 +61,7 @@ class UserServiceImplTest {
 
     @Test
     void createUser_ShouldReturnCreatedUser() {
-        UserCreateDto userCreateDto = new UserCreateDto(1L ,"username", "email@example.com");
+        UserCreateDto userCreateDto = new UserCreateDto(1L, "username", "email@example.com");
         User user = User.builder()
                 .id(1L)
                 .name("username")
@@ -114,6 +114,7 @@ class UserServiceImplTest {
         assertEquals("newEmail@example.com", updatedUser.getEmail());
         assertEquals("newUsername", updatedUser.getName());
     }
+
     @Test
     void removeUser_ShouldReturnRemovedUser() {
         long userId = 1L;
