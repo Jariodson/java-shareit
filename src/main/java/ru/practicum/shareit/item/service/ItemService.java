@@ -12,11 +12,11 @@ public interface ItemService {
 
     ItemDto getItemById(long itemId, long userId);
 
-    Collection<ItemDto> getItems(long userId);
+    Collection<ItemDto> getItems(long userId, Integer start, Integer size);
 
     ItemDto deleteItem(long userId, long itemId);
 
-    Collection<ItemDto> searchItemByName(String text, long userId);
+    Collection<ItemDto> searchItemByName(String text, long userId, Integer start, Integer size);
 
     Item validateItemById(long id);
 

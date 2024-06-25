@@ -1,11 +1,13 @@
 package ru.practicum.shareit.item.service;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingMapper;
-import ru.practicum.shareit.booking.BookingStorage;
 import ru.practicum.shareit.booking.enums.Status;
+import ru.practicum.shareit.booking.storage.BookingStorage;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.*;
@@ -14,7 +16,10 @@ import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.CommentStorage;
+import ru.practicum.shareit.item.storage.ItemPageableStorage;
 import ru.practicum.shareit.item.storage.ItemStorage;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.storage.RequestStorage;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserService;
 
@@ -30,8 +35,12 @@ public class ItemServiceImpl implements ItemService {
     private final CommentStorage commentStorage;
     private final CommentMapper commentMapper;
     private final ItemMapper mapper;
+    private final RequestStorage requestStorage;
+    private final ItemPageableStorage itemPageableStorage;
 
-    public ItemServiceImpl(ItemStorage itemStorage, UserService userService, BookingStorage bookingStorage, BookingMapper bookingMapper, CommentStorage commentStorage, CommentMapper commentMapper, ItemMapper mapper) {
+    public ItemServiceImpl(ItemStorage itemStorage, UserService userService, BookingStorage bookingStorage,
+                           BookingMapper bookingMapper, CommentStorage commentStorage, CommentMapper commentMapper,
+                           ItemMapper mapper, RequestStorage requestStorage, ItemPageableStorage itemPageableStorage) {
         this.itemStorage = itemStorage;
         this.userService = userService;
         this.bookingStorage = bookingStorage;
@@ -39,6 +48,8 @@ public class ItemServiceImpl implements ItemService {
         this.commentStorage = commentStorage;
         this.commentMapper = commentMapper;
         this.mapper = mapper;
+        this.requestStorage = requestStorage;
+        this.itemPageableStorage = itemPageableStorage;
     }
 
 
@@ -47,6 +58,9 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto createItem(long userId, ItemCreatedDto itemCreatedDto) {
         Item item = mapper.transformItemCreatedDtoToItem(itemCreatedDto);
         item.setUser(userService.validateUserDto(userId));
+        ItemRequest itemRequest = itemCreatedDto.getRequestId() != null ?
+                requestStorage.findById(itemCreatedDto.getRequestId()).orElse(null) : null;
+        item.setItemRequest(itemRequest);
         return mapper.transformItemToItemDto(itemStorage.save(item));
     }
 
@@ -80,9 +94,16 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemDto> getItems(long userId) {
+    public Collection<ItemDto> getItems(long userId, Integer start, Integer size) {
+        if (start < 0) {
+            throw new BadRequestException("Значение from не может быть отрицательным");
+        }
+        if (size < 1) {
+            throw new BadRequestException("Значение size не может быть меньше 10");
+        }
+        Pageable pageable = PageRequest.of(start / size, size);
         userService.validateUserDto(userId);
-        List<Item> items = itemStorage.findAllByUserId(userId);
+        List<Item> items = itemPageableStorage.findAllByUserId(userId, pageable);
         List<ItemDto> itemDtos = new ArrayList<>();
         for (Item item : items) {
             itemDtos.add(getLastAndNextBookings(item, userId));
@@ -99,13 +120,21 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemDto> searchItemByName(String text, long userId) {
+    public Collection<ItemDto> searchItemByName(String text, long userId, Integer start, Integer size) {
+        if (start < 0) {
+            throw new BadRequestException("Значение from не может быть отрицательным");
+        }
+        if (size < 1) {
+            throw new BadRequestException("Значение size не может быть меньше 10");
+        }
+        Pageable pageable = PageRequest.of(start / size, size);
         userService.validateUserDto(userId);
         if (text.isBlank()) {
             return List.of();
         }
         return mapper.transformListItemToListItemDto(
-                itemStorage.findAllByNameOrDescriptionContainingIgnoreCaseAndAvailableTrue(text, text));
+                itemPageableStorage.findAllByNameOrDescriptionContainingIgnoreCaseAndAvailableTrue(
+                        text, text, pageable));
     }
 
     @Override
@@ -138,7 +167,7 @@ public class ItemServiceImpl implements ItemService {
         return commentMapper.transformCommentToCommentDto(commentStorage.save(comment));
     }
 
-    private ItemDto getLastAndNextBookings(Item item, long userId) {
+    protected ItemDto getLastAndNextBookings(Item item, long userId) {
         List<Booking> lastBookings = bookingStorage.findAllByItemIdAndEndBeforeOrderByEndDesc(
                 item.getId(), LocalDateTime.now());
         List<Booking> nextBookings = bookingStorage.findAllByItemIdAndStartAfter(item.getId(), LocalDateTime.now());
