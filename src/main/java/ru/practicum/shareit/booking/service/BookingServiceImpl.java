@@ -1,13 +1,16 @@
 package ru.practicum.shareit.booking.service;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingMapper;
-import ru.practicum.shareit.booking.BookingStorage;
 import ru.practicum.shareit.booking.dto.BookingCreatedDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.enums.Status;
+import ru.practicum.shareit.booking.storage.BookingStorage;
+import ru.practicum.shareit.booking.storage.BookingsPageableStorage;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.InternalServerErrorException;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -24,12 +27,14 @@ public class BookingServiceImpl implements BookingService {
     private final ItemService itemService;
     private final UserService userService;
     private final BookingStorage storage;
+    private final BookingsPageableStorage bookingsPageableStorage;
     private final BookingMapper mapper;
 
-    public BookingServiceImpl(ItemService itemService, UserService userService, BookingStorage storage, BookingMapper mapper) {
+    public BookingServiceImpl(ItemService itemService, UserService userService, BookingStorage storage, BookingsPageableStorage bookingsPageableStorage, BookingMapper mapper) {
         this.itemService = itemService;
         this.userService = userService;
         this.storage = storage;
+        this.bookingsPageableStorage = bookingsPageableStorage;
         this.mapper = mapper;
     }
 
@@ -82,56 +87,78 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Collection<BookingDto> getUserBookings(String state, long userId) {
+    public Collection<BookingDto> getUserBookings(String state, Long userId, Integer start, Integer size) {
+        if (start < 0) {
+            throw new BadRequestException("Значение from не может быть отрицательным");
+        }
+        if (size < 1) {
+            throw new BadRequestException("Значение size не может быть меньше 10");
+        }
         userService.validateUserDto(userId);
+        Pageable pageable = PageRequest.of(start / size, size);
         switch (state) {
             case "ALL":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByBookerIdOrderByStartDesc(userId));
+                        bookingsPageableStorage.findAllByBookerIdOrderByStartDesc(userId, pageable));
             case "PAST":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByEndBeforeAndBookerIdOrderByStartDesc(LocalDateTime.now(), userId));
+                        bookingsPageableStorage.findAllByEndBeforeAndBookerIdOrderByStartDesc(
+                                LocalDateTime.now(), userId, pageable));
             case "FUTURE":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByStartAfterAndBookerIdOrderByStartDesc(LocalDateTime.now(), userId));
+                        bookingsPageableStorage.findAllByStartAfterAndBookerIdOrderByStartDesc(
+                                LocalDateTime.now(), userId, pageable));
             case "CURRENT":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByEndAfterAndStartBeforeAndBookerIdOrderByStartDesc(
-                                LocalDateTime.now(), LocalDateTime.now(), userId));
+                        bookingsPageableStorage.findAllByEndAfterAndStartBeforeAndBookerIdOrderByStartDesc(
+                                LocalDateTime.now(), LocalDateTime.now(), userId, pageable));
             case "WAITING":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING));
+                        bookingsPageableStorage.findAllByBookerIdAndStatusOrderByStartDesc(
+                                userId, Status.WAITING, pageable));
             case "REJECTED":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED));
+                        bookingsPageableStorage.findAllByBookerIdAndStatusOrderByStartDesc(
+                                userId, Status.REJECTED, pageable));
             default:
                 throw new InternalServerErrorException("Unknown state: " + state);
         }
     }
 
     @Override
-    public Collection<BookingDto> getAllBookingsByUserOwner(String state, long userId) {
+    public Collection<BookingDto> getAllBookingsByUserOwner(String state, Long userId, Integer start, Integer size) {
+        if (start < 0) {
+            throw new BadRequestException("Значение from не может быть отрицательным");
+        }
+        if (size < 1) {
+            throw new BadRequestException("Значение size не может быть меньше 10");
+        }
+        Pageable pageable = PageRequest.of(start / size, size);
         userService.validateUserDto(userId);
         switch (state) {
             case "ALL":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByItemUserIdOrderByStartDesc(userId));
+                        bookingsPageableStorage.findAllByItemUserIdOrderByStartDesc(userId, pageable));
             case "PAST":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findByEndBeforeAndItemUserIdOrderByStartDesc(LocalDateTime.now(), userId));
+                        bookingsPageableStorage.findByEndBeforeAndItemUserIdOrderByStartDesc(
+                                LocalDateTime.now(), userId, pageable));
             case "FUTURE":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByItemUserIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
+                        bookingsPageableStorage.findAllByItemUserIdAndStartAfterOrderByStartDesc(
+                                userId, LocalDateTime.now(), pageable));
             case "CURRENT":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByEndAfterAndStartBeforeAndItemUserIdOrderByStartDesc(
-                                LocalDateTime.now(), LocalDateTime.now(), userId));
+                        bookingsPageableStorage.findAllByEndAfterAndStartBeforeAndItemUserIdOrderByStartDesc(
+                                LocalDateTime.now(), LocalDateTime.now(), userId, pageable));
             case "WAITING":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByItemUserIdAndStatusOrderByStartDesc(userId, Status.WAITING));
+                        bookingsPageableStorage.findAllByItemUserIdAndStatusOrderByStartDesc(
+                                userId, Status.WAITING, pageable));
             case "REJECTED":
                 return mapper.transformBookingListToBookingDtoList(
-                        storage.findAllByItemUserIdAndStatusOrderByStartDesc(userId, Status.REJECTED));
+                        bookingsPageableStorage.findAllByItemUserIdAndStatusOrderByStartDesc(
+                                userId, Status.REJECTED, pageable));
             default:
                 throw new InternalServerErrorException("Unknown state: " + state);
         }
