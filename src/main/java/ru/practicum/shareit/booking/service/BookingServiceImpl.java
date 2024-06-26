@@ -4,11 +4,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingCreatedDto;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.enums.Status;
+import ru.practicum.shareit.booking.mapper.BookingMapper;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.storage.BookingStorage;
 import ru.practicum.shareit.booking.storage.BookingsPageableStorage;
 import ru.practicum.shareit.exception.BadRequestException;
@@ -170,7 +170,7 @@ public class BookingServiceImpl implements BookingService {
                 new NotFoundException(String.format("Бронь с ID %d не найдена", bookingId)));
     }
 
-    private BookingDto checkBookingOwnerOrItemOwner(Booking booking, long userId) {
+    BookingDto checkBookingOwnerOrItemOwner(Booking booking, long userId) {
         if (booking.getItem().getUser().getId().equals(userId) || booking.getBooker().getId().equals(userId)) {
             return mapper.transformBookingToBookingDto(booking);
         }

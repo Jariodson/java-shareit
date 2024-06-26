@@ -2,8 +2,8 @@ package ru.practicum.shareit.booking.storage;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.enums.Status;
+import ru.practicum.shareit.booking.model.Booking;
 
 import java.time.LocalDateTime;
 import java.util.List;

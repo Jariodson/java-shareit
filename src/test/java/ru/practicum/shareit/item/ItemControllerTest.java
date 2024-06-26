@@ -16,6 +16,7 @@ import ru.practicum.shareit.item.service.ItemService;
 
 import java.util.Collections;
 
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -153,5 +154,24 @@ public class ItemControllerTest {
                 .andExpect(jsonPath("$[0].name").value(itemDto.getName()))
                 .andExpect(jsonPath("$[0].description").value(itemDto.getDescription()))
                 .andExpect(jsonPath("$[0].available").value(itemDto.getAvailable()));
+    }
+
+    @Test
+    public void addCommentShouldReturnCreatedComment() throws Exception {
+        long userId = 1L;
+        long itemId = 1L;
+
+        Mockito.when(itemService.addComment(Mockito.any(CommentCreatedDto.class), Mockito.eq(itemId), Mockito.eq(userId)))
+                .thenReturn(commentDto);
+
+        mockMvc.perform(post("/items/{itemId}/comment", itemId)
+                        .header("X-Sharer-User-Id", userId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(commentCreatedDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.text", is("Great item!")));
+
+        Mockito.verify(itemService).addComment(Mockito.any(CommentCreatedDto.class), Mockito.eq(itemId), Mockito.eq(userId));
     }
 }
