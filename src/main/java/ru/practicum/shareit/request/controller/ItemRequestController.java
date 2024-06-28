@@ -13,14 +13,10 @@ import ru.practicum.shareit.request.service.RequestService;
 import javax.validation.Valid;
 import java.util.List;
 
-/**
- * TODO Sprint add-item-requests.
- */
 @Slf4j
 @RestController
 @Validated
 @RequestMapping(path = "/requests")
-@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 public class ItemRequestController {
     private final RequestService service;
 
@@ -39,25 +35,23 @@ public class ItemRequestController {
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    public List<ItemRequestDto> getRequests(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ResponseEntity<List<ItemRequestDto>> getRequests(@RequestHeader("X-Sharer-User-Id") Long userId) {
         log.info("Получен запрос GET на получение всех запросов");
         List<ItemRequestDto> requesterList = service.getRequests(userId);
         log.info("Вывод всех запросов. Количество: {}", requesterList.size());
-        return requesterList;
+        return new ResponseEntity<>(requesterList, HttpStatus.OK);
     }
 
     @GetMapping("/all")
-    @ResponseStatus(HttpStatus.OK)
-    public List<ItemRequestDto> getRequestByParameter(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                      @RequestParam(value = "from", defaultValue = "0")
-                                                      Integer start,
-                                                      @RequestParam(value = "size", defaultValue = "10")
-                                                      Integer size) {
+    public ResponseEntity<List<ItemRequestDto>> getRequestByParameter(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                                                      @RequestParam(value = "from", defaultValue = "0")
+                                                                      Integer start,
+                                                                      @RequestParam(value = "size", defaultValue = "10")
+                                                                      Integer size) {
         log.info("Получен запрос GET на получение запроса по параметру");
         List<ItemRequestDto> requesterList = service.getRequestsByParameter(userId, start, size);
         log.info("Вывод всех запрос с параметром. From: {}, size: {}", start, size);
-        return requesterList;
+        return new ResponseEntity<>(requesterList, HttpStatus.OK);
     }
 
     @GetMapping("/{requestId}")

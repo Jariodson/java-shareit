@@ -12,9 +12,6 @@ import ru.practicum.shareit.booking.service.BookingService;
 import javax.validation.Valid;
 import java.util.Collection;
 
-/**
- * TODO Sprint add-bookings.
- */
 @Slf4j
 @RestController
 @RequestMapping(path = "/bookings")
@@ -55,24 +52,24 @@ public class BookingController {
     }
 
     @GetMapping
-    public Collection<BookingDto> getAllBookingsByUser(
+    public ResponseEntity<Collection<BookingDto>> getAllBookingsByUser(
             @RequestParam(name = "state", defaultValue = "ALL") String state,
             @RequestHeader("X-Sharer-User-Id") long bookerId,
             @RequestParam(value = "from", defaultValue = "0") Integer start,
             @RequestParam(value = "size", defaultValue = "10") Integer size) {
         log.info("Получен запрос GET на получение всех бронирований пользователя c ID: {}", bookerId);
         log.info("Вывод всех бронирований");
-        return service.getUserBookings(state, bookerId, start, size);
+        return new ResponseEntity<>(service.getUserBookings(state, bookerId, start, size), HttpStatus.OK);
     }
 
     @GetMapping("/owner")
-    public Collection<BookingDto> getBookingsByUser(
+    public ResponseEntity<Collection<BookingDto>> getBookingsByUser(
             @RequestParam(name = "state", defaultValue = "ALL") String state,
             @RequestHeader("X-Sharer-User-Id") long userId,
             @RequestParam(value = "from", defaultValue = "0") Integer start,
             @RequestParam(value = "size", defaultValue = "10") Integer size) {
         log.info("Получен запрос GET на получение всех бронирований вещей принадлежащих пользователю с ID: {}", userId);
         log.info("Вывод всех бронирований");
-        return service.getAllBookingsByUserOwner(state, userId, start, size);
+        return new ResponseEntity<>(service.getAllBookingsByUserOwner(state, userId, start, size), HttpStatus.OK);
     }
 }
