@@ -13,9 +13,6 @@ import ru.practicum.shareit.user.service.UserService;
 import javax.validation.Valid;
 import java.util.Collection;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Slf4j
 @RestController
 @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -46,11 +43,10 @@ public class UserController {
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    public Collection<UserDto> getUsers() {
+    public ResponseEntity<Collection<UserDto>> getUsers() {
         log.info("Получен запрос GET на получение всех пользователей");
         log.info("Вывод всех пользователей");
-        return userService.getUsers();
+        return new ResponseEntity<>(userService.getUsers(), HttpStatus.OK);
     }
 
     @GetMapping("/{userId}")

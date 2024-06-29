@@ -1,6 +1,7 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.booking.model;
 
 import lombok.Data;
+import lombok.Generated;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import ru.practicum.shareit.booking.enums.Status;
@@ -10,14 +11,12 @@ import ru.practicum.shareit.user.model.User;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
-/**
- * TODO Sprint add-bookings.
- */
 @Data
 @SuperBuilder
 @NoArgsConstructor
 @Entity
 @Table(name = "booking")
+@Generated
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

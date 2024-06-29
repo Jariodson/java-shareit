@@ -12,9 +12,6 @@ import javax.validation.Valid;
 import java.util.Collection;
 import java.util.Optional;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Slf4j
 @RestController
 @RequestMapping("/items")
@@ -55,11 +52,12 @@ public class ItemController {
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    public Collection<ItemDto> getItems(@RequestHeader("X-Sharer-User-Id") long userId) {
+    public ResponseEntity<Collection<ItemDto>> getItems(@RequestHeader("X-Sharer-User-Id") long userId,
+                                                        @RequestParam(value = "from", defaultValue = "0") Integer start,
+                                                        @RequestParam(value = "size", defaultValue = "10") Integer size) {
         log.info("Получен запрос GET на вывод всех предметов пользователя с ID: {}", userId);
         log.info("Вывод всех предметов пользователя с ID: {}", userId);
-        return itemService.getItems(userId);
+        return new ResponseEntity<>(itemService.getItems(userId, start, size), HttpStatus.OK);
     }
 
     @DeleteMapping("/{itemId}")
@@ -73,13 +71,15 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    @ResponseStatus(HttpStatus.OK)
-    public Collection<ItemDto> searchItemByText(@RequestParam Optional<String> text,
-                                                @RequestHeader("X-Sharer-User-Id") Optional<Long> userId) {
+    public ResponseEntity<Collection<ItemDto>> searchItemByText(@RequestParam Optional<String> text,
+                                                                @RequestHeader("X-Sharer-User-Id") Optional<Long> userId,
+                                                                @RequestParam(value = "from", defaultValue = "0") Integer start,
+                                                                @RequestParam(value = "size", defaultValue = "10") Integer size) {
         if (text.isPresent() && userId.isPresent()) {
             log.info("Получен запрос GET на получение предметов по результатам поиска: {}", text);
             log.info("Вывод предметов вывод предметов связанных с {}", text);
-            return itemService.searchItemByName(text.get(), userId.get());
+            return new ResponseEntity<>(itemService.searchItemByName(text.get(), userId.get(), start, size),
+                    HttpStatus.OK);
         }
         throw new IllegalArgumentException("Ошибка!");
     }
