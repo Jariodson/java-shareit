@@ -3,6 +3,7 @@ package ru.practicum.shareit.client;
 import java.util.List;
 import java.util.Map;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -12,12 +13,10 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
+
+@RequiredArgsConstructor
 public class BaseClient {
     protected final RestTemplate rest;
-
-    public BaseClient(RestTemplate rest) {
-        this.rest = rest;
-    }
 
     protected ResponseEntity<Object> get(String path) {
         return get(path, null, null);
@@ -95,13 +94,22 @@ public class BaseClient {
         return prepareGatewayResponse(shareitServerResponse);
     }
 
-    private HttpHeaders defaultHeaders(Long userId) {
+    protected HttpHeaders defaultHeaders(Long userId) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         if (userId != null) {
             headers.set("X-Sharer-User-Id", String.valueOf(userId));
         }
+        return headers;
+    }
+
+    protected HttpHeaders getHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+
         return headers;
     }
 
@@ -117,5 +125,26 @@ public class BaseClient {
         }
 
         return responseBuilder.build();
+    }
+
+    protected ResponseEntity<Object> exchange(String path,
+                                              HttpMethod method,
+                                              @Nullable Object body,
+                                              HttpHeaders headers,
+                                              @Nullable Map<String, Object> params) {
+        try {
+            HttpEntity<Object> httpEntity = new HttpEntity<>(body, headers);
+
+            if (params != null) {
+                return rest.exchange(path, method, httpEntity, Object.class, params);
+            } else {
+                return rest.exchange(path, method, httpEntity, Object.class);
+            }
+        } catch (HttpStatusCodeException e) {
+            return ResponseEntity
+                    .status(e.getStatusCode())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(e.getResponseBodyAsByteArray());
+        }
     }
 }
