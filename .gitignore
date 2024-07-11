@@ -31,3 +31,12 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Ignore all .class files
+*.class
+
+# Ignore all .jar files
+*.jar
+
+# Ignore all .DS_Store files
+*.DS_Store
